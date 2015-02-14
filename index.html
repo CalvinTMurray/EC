@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head ng-app="MainApp">
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,11 +11,15 @@
 
     <title>Stylish Portfolio - Start Bootstrap Theme</title>
 
+    <script src="bower_components/angular-material/angular-material.min.js"></script>
+    <script src="bower_components/angular/angular.min.js"></script>
+
     <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="css/bootstrap.min.css" rel="stylesheet">-->
 
     <!-- Custom CSS -->
-    <link href="css/stylish-portfolio.css" rel="stylesheet">
+    <!--<link href="css/stylish-portfolio.css" rel="stylesheet">-->
+    <link href="bower_components/angular-material/angular-material.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -64,8 +68,8 @@
             <h1>Enterprise Computing</h1>
             <h3></h3>
             <br>
-            <!--<md-button class="md-primary">Get Reliability</md-button>-->
-            <a href="#about" class="btn btn-dark btn-lg">Find out Reliability</a>
+            <md-button class="md-primary">Get Reliability</md-button>
+            <!--<a href="#about" class="btn btn-dark btn-lg">Find out Reliability</a>-->
         </div>
     </header>
 
@@ -307,6 +311,8 @@
         <!--});-->
     <!--});-->
     <!--</script>-->
+
+
 
 </body>
 
