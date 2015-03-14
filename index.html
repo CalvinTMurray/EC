@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<html xmlns:ng="http://angularjs.org" id='ng-app' ng-app="angular-google-maps-example">
 
 <head ng-app="MainApp">
 
@@ -11,8 +12,7 @@
 
     <title>Stylish Portfolio - Start Bootstrap Theme</title>
 
-    <script src="bower_components/angular-material/angular-material.min.js"></script>
-    <script src="bower_components/angular/angular.min.js"></script>
+
 
     <!-- Bootstrap Core CSS -->
     <!--<link href="css/bootstrap.min.css" rel="stylesheet">-->
@@ -35,7 +35,50 @@
 </head>
 
 <body>
+<head>
+    <style type="text/css">
+        html, body, #map-canvas { height: 80%; margin: 0; padding: 0;}
+    </style>
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNw-o4K-1GOBLJcqGECyqAPg2drkdAJQk">
+    </script>
+    <script type="text/javascript">
+        function initialize() {
+            var appleton = new google.maps.LatLng(55.9444,-3.1872);
 
+            var mapOptions = {
+                center: { lat: 55.9531, lng: -3.1889},
+                zoom: 14
+            };
+            var contentString = '<div id="content">'+
+                    '<p>"This is Appleton Tower"<p>'+
+                    '</div>';
+
+            var infowindow = new google.maps.InfoWindow({
+                content: contentString
+            });
+
+
+            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+            var marker = new google.maps.Marker({
+                position:appleton ,
+                title:"Appleton Tower"
+            });
+
+            google.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(map,marker);
+            });
+            google.maps.event.addDomListener(window, 'load', initialize);
+// To add the marker to the map, call setMap();
+            marker.setMap(map);
+
+        }
+        google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+</head>
+<body>
+<div id="map-canvas"></div>
     <!-- Navigation -->
     <a id="menu-toggle" href="#" class="btn btn-dark btn-lg toggle"><i class="fa fa-bars"></i></a>
     <nav id="sidebar-wrapper">
