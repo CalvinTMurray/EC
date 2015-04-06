@@ -1,10 +1,5 @@
 <!DOCTYPE html>
-<<<<<<< HEAD
-<html lang="en">
-<html xmlns:ng="http://angularjs.org" id='ng-app' ng-app="angular-google-maps-example">
-=======
 <html lang="en" ng-app="MainApp">
->>>>>>> 01d4f2d61c8805a672198b304d294b92f076c8a3
 
 <head>
 
@@ -16,15 +11,11 @@
 
     <title>Stylish Portfolio - Start Bootstrap Theme</title>
 
-<<<<<<< HEAD
-
-=======
     <script src="bower_components/angular/angular.min.js"></script>
     <script src="bower_components/angular-animate/angular-animate.min.js"></script>
     <script src="bower_components/angular-aria/angular-aria.min.js"></script>
     <script src="bower_components/angular-material/angular-material.min.js"></script>
-    <script src="angular-modules/main.js"></script>
->>>>>>> 01d4f2d61c8805a672198b304d294b92f076c8a3
+    <script src="ts/angular/main.js"></script>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -40,334 +31,80 @@
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-</head>
-
-<body>
-<head>
-    <style type="text/css">
-        html, body, #map-canvas { height: 80%; margin: 0; padding: 0;}
-    </style>
+    <!-- You shouldn't really do this, but meh... who cares :) -->
     <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNw-o4K-1GOBLJcqGECyqAPg2drkdAJQk">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNw-o4K-1GOBLJcqGECyqAPg2drkdAJQk&region=GB">
     </script>
-    <script type="text/javascript">
-        function initialize() {
-            var appleton = new google.maps.LatLng(55.9444,-3.1872);
+    <script src="ts/google-maps.js"></script>
 
-            var mapOptions = {
-                center: { lat: 55.9531, lng: -3.1889},
-                zoom: 14
-            };
-            var contentString = '<div id="content">'+
-                    '<p>"This is Appleton Tower"<p>'+
-                    '</div>';
-
-            var infowindow = new google.maps.InfoWindow({
-                content: contentString
-            });
-
-
-            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-            var marker = new google.maps.Marker({
-                position:appleton ,
-                title:"Appleton Tower"
-            });
-
-            google.maps.event.addListener(marker, 'click', function() {
-                infowindow.open(map,marker);
-            });
-            google.maps.event.addDomListener(window, 'load', initialize);
-// To add the marker to the map, call setMap();
-            marker.setMap(map);
-
-        }
-        google.maps.event.addDomListener(window, 'load', initialize);
-    </script>
 </head>
-<body>
-<div id="map-canvas"></div>
-    <!-- Navigation -->
-    <a id="menu-toggle" href="#" class="btn btn-dark btn-lg toggle"><i class="fa fa-bars"></i></a>
-    <nav id="sidebar-wrapper">
-        <ul class="sidebar-nav">
-            <a id="menu-close" href="#" class="btn btn-light btn-lg pull-right toggle"><i class="fa fa-times"></i></a>
-            <li class="sidebar-brand">
-                <a href="#top">Start Bootstrap</a>
-            </li>
-            <li>
-                <a href="#top">Home</a>
-            </li>
-            <li>
-                <a href="#about">About</a>
-            </li>
-            <li>
-                <a href="#services">Services</a>
-            </li>
-            <li>
-                <a href="#portfolio">Portfolio</a>
-            </li>
-            <li>
-                <a href="#contact">Contact</a>
-            </li>
-        </ul>
-    </nav>
 
-    <!-- Header -->
-    <header id="top" class="header">
-        <div class="text-vertical-center">
-            <h1>Enterprise Computing</h1>
-            <h3></h3>
-            <br>
-            <md-button class="md-primary">Get Reliability</md-button>
-            <!--<a href="#about" class="btn btn-dark btn-lg">Find out Reliability</a>-->
-        </div>
-    </header>
+<body ng-controller="mainCtrl" ng-init="initialize()">
 
+<!-- Header -->
+<header id="top" class="header">
+    <div class="text-vertical-center">
+        <h1>Enterprise Computing</h1>
+    </div>
+</header>
 
-    <!-- About -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <h2>Plan Your Trip!</h2>
+<div layout="row" ng-controller="mainCtrl">
 
-                    <md-input-container>
-                        <label>Start Location</label>
-                        <input>
-                    </md-input-container>
+    <md-card flex="33">
 
-                    <!--<p class="lead">This theme features some wonderful photography courtesy of <a target="_blank" href="http://join.deathtothestockphoto.com/">Death to the Stock Photo</a>.</p>-->
-                </div>
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.container -->
-    </section>
+        <md-content>
 
-    <!-- Services -->
-    <!-- The circle icons use Font Awesome's stacked icon classes. For more information, visit http://fontawesome.io/examples/ -->
-    <section id="services" class="services bg-primary">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-lg-10 col-lg-offset-1">
-                    <h2>Our Services</h2>
-                    <hr class="small">
-                    <div class="row">
-                        <div class="col-md-3 col-sm-6">
-                            <div class="service-item">
-                                <span class="fa-stack fa-4x">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-cloud fa-stack-1x text-primary"></i>
-                            </span>
-                                <h4>
-                                    <strong>Service Name</strong>
-                                </h4>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                <a href="#" class="btn btn-light">Learn More</a>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="service-item">
-                                <span class="fa-stack fa-4x">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-compass fa-stack-1x text-primary"></i>
-                            </span>
-                                <h4>
-                                    <strong>Service Name</strong>
-                                </h4>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                <a href="#" class="btn btn-light">Learn More</a>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="service-item">
-                                <span class="fa-stack fa-4x">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-flask fa-stack-1x text-primary"></i>
-                            </span>
-                                <h4>
-                                    <strong>Service Name</strong>
-                                </h4>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                <a href="#" class="btn btn-light">Learn More</a>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <div class="service-item">
-                                <span class="fa-stack fa-4x">
-                                <i class="fa fa-circle fa-stack-2x"></i>
-                                <i class="fa fa-shield fa-stack-1x text-primary"></i>
-                            </span>
-                                <h4>
-                                    <strong>Service Name</strong>
-                                </h4>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                <a href="#" class="btn btn-light">Learn More</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- /.row (nested) -->
-                </div>
-                <!-- /.col-lg-10 -->
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.container -->
-    </section>
+            <h2 align="center">Get Reliability!!</h2>
+            <md-input-container flex>
+                <label>Start Location</label>
+                <input id="auto-complete">
+            </md-input-container>
+        </md-content>
 
-    <!-- Callout -->
-    <aside class="callout">
-        <div class="text-vertical-center">
-            <h1>Vertically Centered Text</h1>
-        </div>
-    </aside>
+    </md-card>
 
-    <!-- Portfolio -->
-    <section id="portfolio" class="portfolio">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-10 col-lg-offset-1 text-center">
-                    <h2>Our Work</h2>
-                    <hr class="small">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="portfolio-item">
-                                <a href="#">
-                                    <img class="img-portfolio img-responsive" src="img/edinburgh.jpg">
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="portfolio-item">
-                                <a href="#">
-                                    <img class="img-portfolio img-responsive" src="img/portfolio-2.jpg">
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="portfolio-item">
-                                <a href="#">
-                                    <img class="img-portfolio img-responsive" src="img/portfolio-3.jpg">
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="portfolio-item">
-                                <a href="#">
-                                    <img class="img-portfolio img-responsive" src="img/portfolio-4.jpg">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- /.row (nested) -->
-                    <a href="#" class="btn btn-dark">View More Items</a>
-                </div>
-                <!-- /.col-lg-10 -->
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.container -->
-    </section>
+    <md-card flex>
+        <md-content>
+            <div flex id="map-canvas" style="height:600px"></div>
+        </md-content>
+    </md-card>
+</div>
 
-    <!-- Call to Action -->
-    <aside class="call-to-action bg-primary">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <h3>The buttons below are impossible to resist.</h3>
-                    <a href="#" class="btn btn-lg btn-light">Click Me!</a>
-                    <a href="#" class="btn btn-lg btn-dark">Look at Me!</a>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Map -->
-    <section id="contact" class="map">
-        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;aq=0&amp;oq=twitter&amp;sll=28.659344,-81.187888&amp;sspn=0.128789,0.264187&amp;ie=UTF8&amp;hq=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;t=m&amp;z=15&amp;iwloc=A&amp;output=embed"></iframe>
-        <br />
-        <small>
-            <a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;aq=0&amp;oq=twitter&amp;sll=28.659344,-81.187888&amp;sspn=0.128789,0.264187&amp;ie=UTF8&amp;hq=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;t=m&amp;z=15&amp;iwloc=A"></a>
-        </small>
-        </iframe>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-10 col-lg-offset-1 text-center">
-                    <h4><strong>Start Bootstrap</strong>
-                    </h4>
-                    <p>3481 Melrose Place<br>Beverly Hills, CA 90210</p>
-                    <ul class="list-unstyled">
-                        <li><i class="fa fa-phone fa-fw"></i> (123) 456-7890</li>
-                        <li><i class="fa fa-envelope-o fa-fw"></i>  <a href="mailto:name@example.com">name@example.com</a>
-                        </li>
-                    </ul>
-                    <br>
-                    <ul class="list-inline">
-                        <li>
-                            <a href="#"><i class="fa fa-facebook fa-fw fa-3x"></i></a>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-twitter fa-fw fa-3x"></i></a>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-dribbble fa-fw fa-3x"></i></a>
-                        </li>
-                    </ul>
-                    <hr class="small">
-                    <p class="text-muted">Copyright &copy; Your Website 2014</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!--&lt;!&ndash; jQuery &ndash;&gt;-->
-    <!--<script src="js/jquery.js"></script>-->
-
-    <!--&lt;!&ndash; Bootstrap Core JavaScript &ndash;&gt;-->
-    <!--<script src="js/bootstrap.min.js"></script>-->
-
-    <!--&lt;!&ndash; Custom Theme JavaScript &ndash;&gt;-->
-    <!--<script>-->
-    <!--// Closes the sidebar menu-->
-    <!--$("#menu-close").click(function(e) {-->
-        <!--e.preventDefault();-->
-        <!--$("#sidebar-wrapper").toggleClass("active");-->
-    <!--});-->
-
-    <!--// Opens the sidebar menu-->
-    <!--$("#menu-toggle").click(function(e) {-->
-        <!--e.preventDefault();-->
-        <!--$("#sidebar-wrapper").toggleClass("active");-->
-    <!--});-->
-
-    <!--// Scrolls to the selected menu item on the page-->
-    <!--$(function() {-->
-        <!--$('a[href*=#]:not([href=#])').click(function() {-->
-            <!--if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') || location.hostname == this.hostname) {-->
-
-                <!--var target = $(this.hash);-->
-                <!--target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');-->
-                <!--if (target.length) {-->
-                    <!--$('html,body').animate({-->
-                        <!--scrollTop: target.offset().top-->
-                    <!--}, 1000);-->
-                    <!--return false;-->
-                <!--}-->
-            <!--}-->
-        <!--});-->
-    <!--});-->
-    <!--</script>-->
-
-
+<!--&lt;!&ndash; Footer &ndash;&gt;-->
+<!--<footer>-->
+<!--<div class="container">-->
+<!--<div class="row">-->
+<!--<div class="col-lg-10 col-lg-offset-1 text-center">-->
+<!--<h4><strong>Start Bootstrap</strong>-->
+<!--</h4>-->
+<!--<p>3481 Melrose Place<br>Beverly Hills, CA 90210</p>-->
+<!--<ul class="list-unstyled">-->
+<!--<li><i class="fa fa-phone fa-fw"></i> (123) 456-7890</li>-->
+<!--<li><i class="fa fa-envelope-o fa-fw"></i>  <a href="mailto:name@example.com">name@example.com</a>-->
+<!--</li>-->
+<!--</ul>-->
+<!--<br>-->
+<!--<ul class="list-inline">-->
+<!--<li>-->
+<!--<a href="#"><i class="fa fa-facebook fa-fw fa-3x"></i></a>-->
+<!--</li>-->
+<!--<li>-->
+<!--<a href="#"><i class="fa fa-twitter fa-fw fa-3x"></i></a>-->
+<!--</li>-->
+<!--<li>-->
+<!--<a href="#"><i class="fa fa-dribbble fa-fw fa-3x"></i></a>-->
+<!--</li>-->
+<!--</ul>-->
+<!--<hr class="small">-->
+<!--<p class="text-muted">Copyright &copy; Your Website 2014</p>-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+<!--</footer>-->
 
 </body>
 
