@@ -41,7 +41,7 @@
 
     <!-- You shouldn't really do this, but meh... who cares :) -->
     <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNw-o4K-1GOBLJcqGECyqAPg2drkdAJQk&region=GB&sensor=false&libraries=places">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNw-o4K-1GOBLJcqGECyqAPg2drkdAJQk&region=GB&sensor=false&libraries=places,geometry">
     </script>
 
 </head>
@@ -55,61 +55,70 @@
     </div>
 </header>
 
-<h1 align="center">Reliability for the past week</h1>
-<div layout="row">
+<div style="height: 100%">
+
+    <h1 align="center">Reliability for the past week</h1>
+    <div layout="row" ng-controller="RadiusFilterCtrl">
 
 
-    <md-card flex="33" layout-padding style="height: 600px">
+        <md-card flex="33" layout-padding style="height: 100%">
 
-        <md-content style="height: 250px">
+            <md-content style="height: 100%">
 
 
-            <div>
-                Search bus stop reliabilities near:
-                <md-radio-group ng-model="searchNearby">
-                    <md-radio-button value="Current Location" class="md-primary" aria-label="Current Location">Current Location</md-radio-button>
-                    <md-radio-button value="Search Location" class="md-primary" aria-label="Search Location">
-                        {{searchLocation}}
-                    </md-radio-button>
-                </md-radio-group>
-            </div>
+                <div>
+                    <h4>Search Bus Stop Reliabilities Near</h4>
+                    <md-radio-group ng-model="searchNearby">
+                        <md-radio-button value="Current Location" class="md-primary" aria-label="Current Location">Current Location</md-radio-button>
+                        <md-radio-button value="Search Location" class="md-primary" aria-label="Search Location">
+                            {{searchLocation}}
+                        </md-radio-button>
+                    </md-radio-group>
+                </div>
 
-            <div layout="row">
-                <md-input-container md-no-float flex ng-hide="searchNearby === 'Current Location'">
-                    <input placeholder="Search Location" type="text" id="searchInput">
-                </md-input-container>
-            </div>
+                <div layout="row">
+                    <md-input-container md-no-float flex ng-hide="searchNearby === 'Current Location'">
+                        <input placeholder="Search Location" type="text" id="searchInput">
+                    </md-input-container>
+                </div>
 
-        </md-content>
+                <h4>Filter Bus Stop Reliabilities Within Radius (metres)</h4>
+                <div layout>
+                    <md-slider flex step="100" min="0" max="10000" ng-model="radius" aria-label="radius filter in metres" id="radius-slider" class>
+                    </md-slider>
+                    <div flex="20" layout layout-align="center center">
+                        <input type="number" ng-model="radius" value="0" step="100" min="0" max="10000" aria-label="radius filter in metres" aria-controls="radius-slider">
+                    </div>
+                </div>
 
-        <div></div>
+            </md-content>
 
-        <md-toolbar>
-            <h5 align="center">Bus Stop Reliabilities Near {{searchNearby === 'Search Location' ? searchLocation : searchNearby}}</h5>
-        </md-toolbar>
-        <md-content style="height: 350px">
 
-            <md-list ng-controller="StopReliabilityListCtrl">
-                <md-list-item class="md-3-line" ng-repeat="stopAndMarker in stopsAndMarkers">
-                    <!--<div class="md-list-item-text">-->
+            <md-toolbar>
+                <h5 align="center">Bus Stop Reliabilities Near {{searchNearby === 'Search Location' ? searchLocation : searchNearby}}</h5>
+            </md-toolbar>
+            <md-content style="height: 300px">
+
+                <md-list ng-controller="StopReliabilityListCtrl">
+                    <md-list-item class="md-3-line" ng-repeat="stopAndMarker in stopsAndMarkers | filter:{display: true}">
+                        <!--<div class="md-list-item-text">-->
                         <h3>{{stopAndMarker.stop.name}}</h3>
                         {{stopAndMarker.stop.score}}% Reliable
 
-                    <!--</div>-->
+                        <!--</div>-->
 
-                </md-list-item>
-                <h3 align="center" ng-show="!stopsAndMarkers.length">No Stops to show</h3>
-            </md-list>
+                    </md-list-item>
+                    <h3 align="center" ng-show="!(stopsAndMarkers | filter:{display: true}).length">No Stops to show</h3>
+                </md-list>
 
-        </md-content>
-    </md-card>
+            </md-content>
+        </md-card>
 
 
-    <md-card flex>
-        <md-content>
-            <div flex id="map-canvas" style="height:600px"></div>
-        </md-content>
-    </md-card>
+        <md-card flex>
+            <div flex id="map-canvas" style="height:100%"></div>
+        </md-card>
+    </div>
 </div>
 
 <!--&lt;!&ndash; Footer &ndash;&gt;-->

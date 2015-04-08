@@ -80,13 +80,38 @@ module services {
     export interface IStopsAndMarkers {
         get() : StopAndMarker[]
         set(stopsAndMarkers : StopAndMarker[]);
+        setDistances(position : google.maps.LatLng, location : Location) : void;
     }
 
     export class StopsAndMarkersDataStore implements IStopsAndMarkers {
-        static  stopsAndMarkers : StopAndMarker[];
+        static  stopsAndMarkers : StopAndMarker[] = null;
 
         static $inject= ['$rootScope'];
         constructor(public $rootScope) {}
+
+        setDistances(position : google.maps.LatLng, location : Location) {
+
+            if (StopsAndMarkersDataStore.stopsAndMarkers === null || position === null) {
+                //console.log("Cannot set distances on null stopsAndMarkers");
+                return;
+            }
+
+            angular.forEach(StopsAndMarkersDataStore.stopsAndMarkers, function(stopAndMarker : StopAndMarker, key) {
+
+                var stop : Stop = stopAndMarker.getStop();
+                var stopPosition : google.maps.LatLng = new google.maps.LatLng(stop.latitude, stop.longitude);
+
+                var distance : number = google.maps.geometry.spherical.computeDistanceBetween(position, stopPosition);
+
+                if (location === Location.CURRENT) {
+                    stopAndMarker.setDistanceFromCurrentLocation(distance);
+                } else if (location === Location.SEARCH) {
+                    stopAndMarker.setDistanceFromSearchLocation(distance);
+                }
+
+            });
+
+        }
 
         get() {
             return StopsAndMarkersDataStore.stopsAndMarkers;
@@ -99,20 +124,56 @@ module services {
         }
     }
 
+    export enum Location {
+        CURRENT, SEARCH
+    }
+
 }
 
 class StopAndMarker {
 
-    constructor (private stop : services.Stop, private marker : google.maps.Marker) {
+    // distances are all in metres
+    private distanceFromCurrentLocation : number;
+    private distanceFromSearchLocation : number;
+    private display : boolean = true;
+
+    constructor (private stop : services.Stop,
+                 private marker : google.maps.Marker) {
 
     }
 
-    getStop() {
+    getStop() : services.Stop{
         return this.stop;
     }
 
-    getMarker() {
+    getMarker() : google.maps.Marker {
         return this.marker;
+    }
+
+    getDistanceFromCurrentLocation() : number {
+        return this.distanceFromCurrentLocation;
+    }
+
+    setDistanceFromCurrentLocation(newDistance : number) : void {
+        this.distanceFromCurrentLocation = newDistance;
+    }
+
+    getDistanceFromSearchLocation() : number {
+        return this.distanceFromSearchLocation;
+    }
+
+    setDistanceFromSearchLocation(newDistance : number) : void {
+        this.distanceFromSearchLocation = newDistance;
+    }
+
+    // Whether to display in the list or show the marker on the map
+    setDisplay(value : boolean) : void {
+        this.display = value;
+        this.marker.setVisible(value);
+    }
+
+    getDisplay() : boolean {
+        return this.display;
     }
 }
 
@@ -122,7 +183,6 @@ interface MainCtrlScope extends ng.IScope {
     getBusReliabilities;
     initialize;
 
-    searchNearby;
     searchLocation;
 
 }
@@ -157,8 +217,9 @@ angular.module('MainApp', ['ngMaterial', 'ngAria'])
                  PositionService : services.IPositionService, $http, mapsDataStore,
                  StopsAndMarkersService : services.IStopsAndMarkers) {
 
-            $scope.searchNearby = "Current Location";
+
             $scope.searchLocation = PositionService.getSearchLocation() !== null ? PositionService.getSearchLocation() : "Search Location";
+            $scope.busReliabilities = null;
 
             $scope.$on("UpdatedSearchLocation", function(event, value) {
                 //console.log(value.name);
@@ -166,13 +227,13 @@ angular.module('MainApp', ['ngMaterial', 'ngAria'])
                 $scope.$apply();
             });
 
-            $scope.getBusReliabilities = function() {
+            function getBusReliabilities () {
                 return $http.get("http://curlyarrows.byethost9.com/api/scores").success(function(response) {
                     console.log("Retrieving bus reliabilities");
                     $scope.busReliabilities = response.stops;
                     BusReliabilityService.put(response.stops);
                 });
-            };
+            }
 
             $scope.initialize = function () {
                 //var appleton : google.maps.LatLng = new google.maps.LatLng(55.9444, -3.1872);
@@ -210,8 +271,9 @@ angular.module('MainApp', ['ngMaterial', 'ngAria'])
 
                 //google.maps.event.addDomListener(window, 'load', $scope.initialize);
 
-                $scope.getBusReliabilities().then(function() {
+                getBusReliabilities().then(function() {
                     initialiseMarkers(map, $scope.busReliabilities);
+                    StopsAndMarkersService.setDistances(PositionService.getCurrentPosition(), services.Location.CURRENT);
                 });
             };
 
@@ -242,6 +304,8 @@ angular.module('MainApp', ['ngMaterial', 'ngAria'])
                         var infowindow = new google.maps.InfoWindow({
                             content: "Current Location"
                         });
+
+                        infowindow.open(map, currentMarker);
 
                         google.maps.event.addListener(currentMarker, 'click', function() {
                             infowindow.open(map,currentMarker);
@@ -373,6 +437,8 @@ angular.module('MainApp', ['ngMaterial', 'ngAria'])
                 });
             }
 
+
+
         }])
 
     .controller('StopReliabilityListCtrl', ['$scope', 'StopsAndMarkersService',
@@ -382,7 +448,62 @@ angular.module('MainApp', ['ngMaterial', 'ngAria'])
 
             $scope.$on("UpdatedStopsAndMarkers", function(event, value) {
                 $scope.stopsAndMarkers = value;
-                console.log(value);
             })
 
-        }]);
+        }])
+
+    .controller('RadiusFilterCtrl', ['$scope', 'StopsAndMarkersService', function($scope, StopsAndMarkersService : services.IStopsAndMarkers) {
+
+        $scope.radius = 10000;
+        $scope.searchNearby = "Current Location";
+
+        $scope.$on("UpdatedSearchLocation", function(event, place : google.maps.places.PlaceResult) {
+            if(place !== null) {
+                StopsAndMarkersService.setDistances(place.geometry.location, services.Location.SEARCH);
+                setDisplayHelper();
+            } else {
+                StopsAndMarkersService.setDistances(null, services.Location.SEARCH);
+            }
+
+        });
+
+        $scope.$watchGroup(['radius', 'searchNearby'], function(newValues, oldValues) {
+            setDisplayHelper();
+        });
+
+        function setDisplayHelper() {
+            var stopsAndMarkers = StopsAndMarkersService.get();
+
+            if ($scope.searchNearby === "Current Location") {
+                setDisplay(stopsAndMarkers, services.Location.CURRENT);
+            } else if ($scope.searchNearby === "Search Location") {
+                setDisplay(stopsAndMarkers, services.Location.SEARCH);
+            }
+        }
+
+        function setDisplay(stopsAndMarkers : StopAndMarker[], location : services.Location): void {
+
+            angular.forEach(stopsAndMarkers, function(stopAndMarker : StopAndMarker, key) {
+                var distance : number;
+                if (location === services.Location.CURRENT) {
+                    distance = stopAndMarker.getDistanceFromCurrentLocation();
+                } else if (location === services.Location.SEARCH) {
+                    distance = stopAndMarker.getDistanceFromSearchLocation();
+                }
+
+                if (distance > $scope.radius) {
+                    if (stopAndMarker.getDisplay() !== false) {
+                        stopAndMarker.setDisplay(false);
+                    }
+                } else {
+                    if (stopAndMarker.getDisplay() !== true) {
+                        stopAndMarker.setDisplay(true);
+                    }
+                }
+
+            })
+
+        }
+
+
+    }]);

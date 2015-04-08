@@ -48,6 +48,23 @@ var services;
         function StopsAndMarkersDataStore($rootScope) {
             this.$rootScope = $rootScope;
         }
+        StopsAndMarkersDataStore.prototype.setDistances = function (position, location) {
+            if (StopsAndMarkersDataStore.stopsAndMarkers === null || position === null) {
+                //console.log("Cannot set distances on null stopsAndMarkers");
+                return;
+            }
+            angular.forEach(StopsAndMarkersDataStore.stopsAndMarkers, function (stopAndMarker, key) {
+                var stop = stopAndMarker.getStop();
+                var stopPosition = new google.maps.LatLng(stop.latitude, stop.longitude);
+                var distance = google.maps.geometry.spherical.computeDistanceBetween(position, stopPosition);
+                if (location === 0 /* CURRENT */) {
+                    stopAndMarker.setDistanceFromCurrentLocation(distance);
+                }
+                else if (location === 1 /* SEARCH */) {
+                    stopAndMarker.setDistanceFromSearchLocation(distance);
+                }
+            });
+        };
         StopsAndMarkersDataStore.prototype.get = function () {
             return StopsAndMarkersDataStore.stopsAndMarkers;
         };
@@ -55,21 +72,48 @@ var services;
             StopsAndMarkersDataStore.stopsAndMarkers = stopsAndMarkers;
             this.$rootScope.$broadcast("UpdatedStopsAndMarkers", stopsAndMarkers);
         };
+        StopsAndMarkersDataStore.stopsAndMarkers = null;
         StopsAndMarkersDataStore.$inject = ['$rootScope'];
         return StopsAndMarkersDataStore;
     })();
     services.StopsAndMarkersDataStore = StopsAndMarkersDataStore;
+    (function (Location) {
+        Location[Location["CURRENT"] = 0] = "CURRENT";
+        Location[Location["SEARCH"] = 1] = "SEARCH";
+    })(services.Location || (services.Location = {}));
+    var Location = services.Location;
 })(services || (services = {}));
 var StopAndMarker = (function () {
     function StopAndMarker(stop, marker) {
         this.stop = stop;
         this.marker = marker;
+        this.display = true;
     }
     StopAndMarker.prototype.getStop = function () {
         return this.stop;
     };
     StopAndMarker.prototype.getMarker = function () {
         return this.marker;
+    };
+    StopAndMarker.prototype.getDistanceFromCurrentLocation = function () {
+        return this.distanceFromCurrentLocation;
+    };
+    StopAndMarker.prototype.setDistanceFromCurrentLocation = function (newDistance) {
+        this.distanceFromCurrentLocation = newDistance;
+    };
+    StopAndMarker.prototype.getDistanceFromSearchLocation = function () {
+        return this.distanceFromSearchLocation;
+    };
+    StopAndMarker.prototype.setDistanceFromSearchLocation = function (newDistance) {
+        this.distanceFromSearchLocation = newDistance;
+    };
+    // Whether to display in the list or show the marker on the map
+    StopAndMarker.prototype.setDisplay = function (value) {
+        this.display = value;
+        this.marker.setVisible(value);
+    };
+    StopAndMarker.prototype.getDisplay = function () {
+        return this.display;
     };
     return StopAndMarker;
 })();
@@ -87,20 +131,20 @@ angular.module('MainApp', ['ngMaterial', 'ngAria']).factory('mapsDataStore', fun
         put: put
     };
 }).service("BusReliabilityService", services.BusReliabilityDataStore).service("PositionService", services.LocationDataStore).service("StopsAndMarkersService", services.StopsAndMarkersDataStore).controller('MainCtrl', ['$scope', 'BusReliabilityService', 'PositionService', '$http', 'mapsDataStore', 'StopsAndMarkersService', function ($scope, BusReliabilityService, PositionService, $http, mapsDataStore, StopsAndMarkersService) {
-    $scope.searchNearby = "Current Location";
     $scope.searchLocation = PositionService.getSearchLocation() !== null ? PositionService.getSearchLocation() : "Search Location";
+    $scope.busReliabilities = null;
     $scope.$on("UpdatedSearchLocation", function (event, value) {
         //console.log(value.name);
         $scope.searchLocation = value !== null ? value.name : "Search Location";
         $scope.$apply();
     });
-    $scope.getBusReliabilities = function () {
+    function getBusReliabilities() {
         return $http.get("http://curlyarrows.byethost9.com/api/scores").success(function (response) {
             console.log("Retrieving bus reliabilities");
             $scope.busReliabilities = response.stops;
             BusReliabilityService.put(response.stops);
         });
-    };
+    }
     $scope.initialize = function () {
         //var appleton : google.maps.LatLng = new google.maps.LatLng(55.9444, -3.1872);
         //
@@ -130,8 +174,9 @@ angular.module('MainApp', ['ngMaterial', 'ngAria']).factory('mapsDataStore', fun
         // To add the marker to the map, call setMap();
         //marker.setMap(map);
         //google.maps.event.addDomListener(window, 'load', $scope.initialize);
-        $scope.getBusReliabilities().then(function () {
+        getBusReliabilities().then(function () {
             initialiseMarkers(map, $scope.busReliabilities);
+            StopsAndMarkersService.setDistances(PositionService.getCurrentPosition(), 0 /* CURRENT */);
         });
     };
     function initialiseGeolocation(map) {
@@ -155,6 +200,7 @@ angular.module('MainApp', ['ngMaterial', 'ngAria']).factory('mapsDataStore', fun
                 var infowindow = new google.maps.InfoWindow({
                     content: "Current Location"
                 });
+                infowindow.open(map, currentMarker);
                 google.maps.event.addListener(currentMarker, 'click', function () {
                     infowindow.open(map, currentMarker);
                 });
@@ -260,7 +306,51 @@ angular.module('MainApp', ['ngMaterial', 'ngAria']).factory('mapsDataStore', fun
     $scope.stopsAndMarkers = StopsAndMarkersService.get();
     $scope.$on("UpdatedStopsAndMarkers", function (event, value) {
         $scope.stopsAndMarkers = value;
-        console.log(value);
     });
+}]).controller('RadiusFilterCtrl', ['$scope', 'StopsAndMarkersService', function ($scope, StopsAndMarkersService) {
+    $scope.radius = 10000;
+    $scope.searchNearby = "Current Location";
+    $scope.$on("UpdatedSearchLocation", function (event, place) {
+        if (place !== null) {
+            StopsAndMarkersService.setDistances(place.geometry.location, 1 /* SEARCH */);
+            setDisplayHelper();
+        }
+        else {
+            StopsAndMarkersService.setDistances(null, 1 /* SEARCH */);
+        }
+    });
+    $scope.$watchGroup(['radius', 'searchNearby'], function (newValues, oldValues) {
+        setDisplayHelper();
+    });
+    function setDisplayHelper() {
+        var stopsAndMarkers = StopsAndMarkersService.get();
+        if ($scope.searchNearby === "Current Location") {
+            setDisplay(stopsAndMarkers, 0 /* CURRENT */);
+        }
+        else if ($scope.searchNearby === "Search Location") {
+            setDisplay(stopsAndMarkers, 1 /* SEARCH */);
+        }
+    }
+    function setDisplay(stopsAndMarkers, location) {
+        angular.forEach(stopsAndMarkers, function (stopAndMarker, key) {
+            var distance;
+            if (location === 0 /* CURRENT */) {
+                distance = stopAndMarker.getDistanceFromCurrentLocation();
+            }
+            else if (location === 1 /* SEARCH */) {
+                distance = stopAndMarker.getDistanceFromSearchLocation();
+            }
+            if (distance > $scope.radius) {
+                if (stopAndMarker.getDisplay() !== false) {
+                    stopAndMarker.setDisplay(false);
+                }
+            }
+            else {
+                if (stopAndMarker.getDisplay() !== true) {
+                    stopAndMarker.setDisplay(true);
+                }
+            }
+        });
+    }
 }]);
 //# sourceMappingURL=main.js.map
