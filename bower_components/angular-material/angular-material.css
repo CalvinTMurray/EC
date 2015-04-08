@@ -31,7 +31,8 @@ html, body {
     font-weight: bold; }
 
 button, select, html, textarea, input {
-  font-family: RobotoDraft, Roboto, 'Helvetica Neue', sans-serif; }
+  /*font-family: RobotoDraft, Roboto, 'Helvetica Neue', sans-serif; }*/
+  font-family: 'Lora', serif; }
 
 body {
   margin: 0;

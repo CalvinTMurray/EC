@@ -9,24 +9,28 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Stylish Portfolio - Start Bootstrap Theme</title>
+    <title>Bus Reliability Tracker</title>
 
     <script src="bower_components/angular/angular.min.js"></script>
     <script src="bower_components/angular-animate/angular-animate.min.js"></script>
     <script src="bower_components/angular-aria/angular-aria.min.js"></script>
     <script src="bower_components/angular-material/angular-material.min.js"></script>
+    <script src="bower_components/lodash/lodash.min.js"></script>
+    <script src="bower_components/restangular/dist/restangular.js"></script>
     <script src="ts/angular/main.js"></script>
 
+    <!-- Custom Fonts -->
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!--<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">-->
+    <!--<link href='http://fonts.googleapis.com/css?family=Lora:400italic' rel='stylesheet' type='text/css'>-->
+    <link href='http://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+
     <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="css/bootstrap.min.css" rel="stylesheet">-->
 
     <!-- Custom CSS -->
     <link href="css/stylish-portfolio.css" rel="stylesheet">
     <link href="bower_components/angular-material/angular-material.css" rel="stylesheet">
-
-    <!-- Custom Fonts -->
-    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -37,13 +41,12 @@
 
     <!-- You shouldn't really do this, but meh... who cares :) -->
     <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNw-o4K-1GOBLJcqGECyqAPg2drkdAJQk&region=GB">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNw-o4K-1GOBLJcqGECyqAPg2drkdAJQk&region=GB&sensor=false&libraries=places">
     </script>
-    <script src="ts/google-maps.js"></script>
 
 </head>
 
-<body ng-controller="mainCtrl" ng-init="initialize()">
+<body ng-controller="MainCtrl" ng-init="initialize()">
 
 <!-- Header -->
 <header id="top" class="header">
@@ -52,20 +55,55 @@
     </div>
 </header>
 
-<div layout="row" ng-controller="mainCtrl">
+<h1 align="center">Reliability for the past week</h1>
+<div layout="row">
 
-    <md-card flex="33">
 
-        <md-content>
+    <md-card flex="33" layout-padding style="height: 600px">
 
-            <h2 align="center">Get Reliability!!</h2>
-            <md-input-container flex>
-                <label>Start Location</label>
-                <input id="auto-complete">
-            </md-input-container>
+        <md-content style="height: 250px">
+
+
+            <div>
+                Search bus stop reliabilities near:
+                <md-radio-group ng-model="searchNearby">
+                    <md-radio-button value="Current Location" class="md-primary" aria-label="Current Location">Current Location</md-radio-button>
+                    <md-radio-button value="Search Location" class="md-primary" aria-label="Search Location">
+                        {{searchLocation}}
+                    </md-radio-button>
+                </md-radio-group>
+            </div>
+
+            <div layout="row">
+                <md-input-container md-no-float flex ng-hide="searchNearby === 'Current Location'">
+                    <input placeholder="Search Location" type="text" id="searchInput">
+                </md-input-container>
+            </div>
+
         </md-content>
 
+        <div></div>
+
+        <md-toolbar>
+            <h5 align="center">Bus Stop Reliabilities Near {{searchNearby === 'Search Location' ? searchLocation : searchNearby}}</h5>
+        </md-toolbar>
+        <md-content style="height: 350px">
+
+            <md-list ng-controller="StopReliabilityListCtrl">
+                <md-list-item class="md-3-line" ng-repeat="stopAndMarker in stopsAndMarkers">
+                    <!--<div class="md-list-item-text">-->
+                        <h3>{{stopAndMarker.stop.name}}</h3>
+                        {{stopAndMarker.stop.score}}% Reliable
+
+                    <!--</div>-->
+
+                </md-list-item>
+                <h3 align="center" ng-show="!stopsAndMarkers.length">No Stops to show</h3>
+            </md-list>
+
+        </md-content>
     </md-card>
+
 
     <md-card flex>
         <md-content>
